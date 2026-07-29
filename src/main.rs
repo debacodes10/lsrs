@@ -3,6 +3,7 @@ use std::fs::{self, DirEntry, Metadata};
 use std::io;
 use std::time::UNIX_EPOCH;
 use std::os::unix::fs::{MetadataExt, PermissionsExt};
+use std::ffi::CStr;
 
 struct Config{
     show_all: bool,
@@ -76,6 +77,38 @@ fn format_permissions(meta: &Metadata) -> String {
     s
 }
 
+fn username_from_uid(uid: u32) -> String {
+    unsafe {
+        let pwd = libc::getpwuid(uid);
+        if pwd.is_null() {
+            return uid.to_string();
+        }
+        let name_ptr = (*pwd).pw_name;
+        if name_ptr.is_null() {
+            return uid.to_string();
+        }
+        CStr::from_ptr(name_ptr)
+            .to_string_lossy()
+            .into_owned()
+    }
+}
+
+fn groupname_from_gid(gid: u32) -> String {
+    unsafe {
+        let grp = libc::getgrgid(gid);
+        if grp.is_null(){
+            return gid.to_string();
+        }
+        let grp_ptr = (*grp).gr_name;
+        if grp_ptr.is_null(){
+            return gid.to_string();
+        }
+        CStr::from_ptr(grp_ptr)
+            .to_string_lossy()
+            .into_owned()
+    }
+}
+
 fn format_modified(meta: &Metadata) -> String {
     let modified = match meta.modified() {
         Ok(t) => t,
@@ -135,13 +168,13 @@ fn print_long(entries: &[DirEntry]) -> io::Result<()> {
         let meta = entry.metadata()?;
         let perms = format_permissions(&meta);
         let nlink = meta.nlink();
-        let uid = meta.uid();
-        let gid = meta.gid();
+        let uid = username_from_uid(meta.uid());
+        let gid = groupname_from_gid(meta.gid());
         let size = meta.size();
         let modified = format_modified(&meta);
         let name = entry.file_name().to_string_lossy().to_string();
         
-        println!("{:<11}   {:>3}   {:>6}   {:>6}   {:>8}   {}   {}", perms, nlink, uid, gid, size, modified, name);
+        println!("{}   {}   {}   {}   {}   {}   {}", perms, nlink, uid, gid, size, modified, name);
     }
     Ok(())
 }

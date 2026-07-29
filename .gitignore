@@ -1,30 +1,30 @@
-# Rust build artifacts
-/target/
-**/target/
-Cargo.lock  # remove this line if this is a library/binary you want to lock deps for
+# Cargo build artifacts
+target/
 
-# Rust backup files
-**/*.rs.bk
-*.pdb
+# Cargo lock
+# Keep Cargo.lock for binaries/applications.
+# Uncomment the next line only if you intentionally don't want to track it.
+# Cargo.lock
 
 # macOS
 .DS_Store
-.AppleDouble
-.LSOverride
-._*
-.Spotlight-V100
-.Trashes
 
-# Editor/IDE
+# VS Code
 .vscode/
+
+# JetBrains
 .idea/
+
+# Vim/Neovim
 *.swp
 *.swo
+*~
 
-# Env / local config
-.env
-.env.local
+# Rust analyzer
+.rust-analyzer/
 
-# Benchmark output (if generated locally)
-benchmark/target/
-benchmark/results/
+# Benchmarks / profiling output
+*.prof
+*.svg
+flamegraph.svg
+perf.data*
