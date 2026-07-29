@@ -1,8 +1,7 @@
 use std::fs::DirEntry;
 use std::io;
 use std::os::unix::fs::MetadataExt;
-
-use crate::format::{format_modified, format_permissions, groupname_from_gid, username_from_uid};
+use crate::format::{format_modified, format_permissions, groupname_from_gid, username_from_uid, format_size};
 
 pub fn print_entries(entries: &[DirEntry]) {
     for entry in entries {
@@ -11,7 +10,7 @@ pub fn print_entries(entries: &[DirEntry]) {
     println!();
 }
 
-pub fn print_long(entries: &[DirEntry]) -> io::Result<()> {
+pub fn print_long(entries: &[DirEntry], human: bool) -> io::Result<()> {
     println!("Permissions   Hard Links   Owner   Group    Modified   Name");
     for entry in entries {
         let meta = entry.metadata()?;
@@ -19,7 +18,11 @@ pub fn print_long(entries: &[DirEntry]) -> io::Result<()> {
         let nlink = meta.nlink();
         let owner = username_from_uid(meta.uid());
         let group = groupname_from_gid(meta.gid());
-        let size = meta.size();
+        let size = if human {
+            format_size(meta.size()) 
+        } else {
+            meta.size().to_string()
+        };
         let modified = format_modified(&meta);
         let name = entry.file_name().to_string_lossy().to_string();
 
