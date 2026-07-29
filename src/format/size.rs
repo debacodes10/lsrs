@@ -4,7 +4,7 @@ pub fn format_size(size_in_bytes: u64) -> String {
     let mut value = size_in_bytes as f64;
     let mut unit = 0;
 
-    while value > 1024.0 && unit < SUFFIXES.len() - 1 {
+    while value >= 1024.0 && unit < SUFFIXES.len() - 1 {
         value /= 1024.0;
         unit+=1;
     }
